@@ -1,0 +1,27 @@
+---
+layout: base
+title: A little JS Game
+---
+<h2>{{ page.title }}</h2>
+
+<p>I was having some fun making a little game in javascript that I wanted to share with you. Please have a play and let me know what you think. The game, called Sokoban, was originally created in 1981 and all appropriate copyright/licensing belongs to the original owner (details <a href="http://en.wikipedia.org/wiki/Sokoban">here</a>).</p>
+
+<p class="no-indent">There are still a few things that at some point I'd like to add, such as multiple levels and a countdown to let you know how many crates you still have left to put in place.</p>
+
+<h3>Instructions</h3>
+<p>You are a warehouseman ("@"). The goal of the game is to move all of the crates ("o") into place by pushing them, one at a time onto their places (".") with keys as follows:</p>
+
+<ul>
+  <li>w: Move up</li>
+  <li>a: Move left</li>
+  <li>s: Move down</li>
+  <li>d: Move right</li>
+  <li>r: Restart level</li>
+</ul>
+
+<div id="container">
+  <!-- Game map included in here -->
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script src="/js/sokoban.js"></script>
+

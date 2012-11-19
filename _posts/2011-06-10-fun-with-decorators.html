@@ -1,0 +1,95 @@
+---
+layout: base
+title: Fun with Decorators
+---
+<h2>{{ page.title }}</h2>
+
+<p>First and foremost, Python is a fantastic language. I recently found myself explaining decorators in Python and have been thinking up any and all ways to use them. For those that aren't familiar with decorators, they are an implementation of a particular software design pattern allowing a programmer to add functionality to existing methods or classes:</p>
+
+<blockquote cite="http://wiki.python.org/moin/PythonDecorators#What_is_a_Decorator"><p>Decorators dynamically alter the functionality of a function, method, or class without having to directly use subclasses or change the source code of the function being decorated.</p></blockquote>
+
+<p>In Python, decorators often have the following definition:</p>
+
+{% highlight python %}
+  def decorator(function_we_want_to_decorate):
+      def wrapper(*args, **kwargs):
+          # Call all methods before function invocation here
+          call_function = function_we_want_to_decorate(*args, **kwargs)
+          # Call all methods after function invocation here
+          return call_function
+      # Do all the cleanup here for documentation etc
+      return wrapper
+
+{% endhighlight %}
+
+<p>They can then be called using one of two methods:</p>
+
+{% highlight python %}
+  # Method 1 - explicit
+  def function_we_want_to_decorate():
+      print "Function called"
+
+  function_we_want_to_decorate = decorator(function_we_want_to_decorate)
+  function_we_want_to_decorate()
+
+
+  # Method 2 - implicit (with @)
+  @decorator
+  def function_we_want_to_decorate():
+      print "Function called"
+
+  function_we_want_to_decorate()
+
+{% endhighlight %}
+
+<p>The preferred syntax currently is the 'implicit' method, making the most of the neater '@'. Given this pattern, we can implement all sorts of fun stuff in our code. For example, haven't you always wanted to count how many times a particular function might get called in your code? Well take a look at this basic implementation:</p>
+
+{% highlight python %}
+  function_call_count = {}
+
+  def count(func):
+      def wrapper(*args, **kwargs):
+          global function_call_count
+          name = func.func_name
+          function_call_count.setdefault(name, 0)
+          function_call_count[name] += 1
+
+          called_func = func(*args, **kwargs)
+
+          print "%s has been called %s times" % (name, function_call_count[name])
+          return called_func
+      return wrapper
+
+  @count
+  def your_function_here():
+      # do something
+
+{% endhighlight %}
+
+<p>You'll now have a dictionary with a count of how often certain functions in your codebase have been executed. Obviously this is a fairly naive implementation, but you can see from this example, just how simple, yet powerful decorators can be. Take a look at this simple timer wrapper for your functions:</p>
+
+{% highlight python %}
+  import datetime
+
+  def timer(func):
+      def wrapper(*args, **kwargs):
+          before = datetime.datetime.now()
+
+          result = func(*args, **kwargs)
+
+          after = datetime.datetime.now()
+          time_taken = after - before
+          print "%s took this long to run: %s" % (func.func_name, time_taken)
+          return result
+      return wrapper
+
+  @timer
+  def count_to(n):
+      for i in xrange(n + 1):
+          print i
+
+  count_to(10000)
+
+{% endhighlight %}
+
+<p>I think you now get the point. Whilst this may at first seem trivial, I think you can now appreciate that this is a particularly powerful construct in a language. I hope you start using decorators more often, just like I did!</p>

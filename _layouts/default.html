@@ -1,0 +1,39 @@
+---
+layout: none
+---
+<!DOCTYPE html>
+<html lang="en" class='no-js'>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Personal Website of Tim Olshansky">
+    <meta name="author" content="Tim Olshansky">
+
+    <title>{{ page.title }}</title>
+
+    <link rel="shortcut icon" type="image/png" href="/favicon.ico">
+    <link type="text/css" rel="stylesheet" media="screen" href="/css/baseline/baseline.reset.css">
+    <link type="text/css" rel="stylesheet" media="screen" href="/css/baseline/baseline.base.css">
+    <link type="text/css" rel="stylesheet" media="screen" href="/css/baseline/baseline.type.css">
+    <link type="text/css" rel="stylesheet" media="screen" href="/css/style.css">
+    <script src="/js/libs/modernizr-1.7.min.js"></script>
+  </head>
+
+  <body>
+    {{ content }}
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-36371136-1']);
+      _gaq.push(['_setDomainName', 'timolshansky.com']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </body>
+</html>

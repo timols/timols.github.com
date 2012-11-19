@@ -1,0 +1,54 @@
+---
+layout: base
+title: OpenSSL TripleDES algorithm in Ruby
+---
+<h2>{{ page.title }}</h2>
+
+<p>OpenSSL has a number of different ciphers available for use when encrypting data. An algorithm I found myself using recently with little discussion on the web is the Triple DES cipher with cipher-block chaining mode (CBC). Triple DES is the name for the <a href="http://en.wikipedia.org/wiki/Triple_DES">Triple Data Encryption Algorithm block cipher</a>.</p>
+
+<p class='no-indent'>Standard usage:</p>
+
+{% highlight ruby %}
+
+def encrypt(data)
+  cipher = OpenSSL::Cipher::Cipher.new('DES-EDE3-CBC')
+  cipher.encrypt # Must be called before anything else
+
+  # Generate the key and initialization vector for the algorithm.
+  # Alternatively, you can specify the initialization vector and cipher key
+  # specifically using `cipher.iv = 'some iv'` and `cipher.key = 'some key'`
+  cipher.pkcs5_keyivgen('SOME_PASS_PHRASE_GOES_HERE')
+
+  output = cipher.update(data)
+  output << cipher.final
+  output
+end
+
+def decrypt(data)
+  # Effectively the same as the `encrypt` method
+  cipher = OpenSSL::Cipher::Cipher.new('DES-EDE3-CBC')
+  cipher.decrypt # Also must be called before anything else
+
+  cipher.pkcs5_keyivgen('SOME_PASS_PHRASE_GOES_HERE')
+
+  output = cipher.update(data)
+  output << cipher.final
+  output
+end
+
+{% endhighlight %}
+
+<p>The second last line is particularly useful to know since the encryption/decryption algorithm operates on 96 bytes at a time, meaning, if you simply call the <code>update</code> method once, the output will be the first 96 bytes of the original data string. So you want to make sure that you call the <code>final</code> method on the cipher to retrieve the remainder. This is particularly useful to remember when you use Base64 encoding/decoding to transmit your data over email
+or the web. Consider the following:</p>
+
+{% highlight ruby %}
+
+b64_encrypted_string = Base64.encode64(encrypt('some data string goes here'))
+#=> "some base 64 encoded string"
+
+decrypted_string = decrypt(Base64.decode64(b64_encrypted_string))
+#=> 'some data string goes here'
+
+{% endhighlight %}
+
+<p>A word of warning, it is recommended that that you use a passphrase to generate the initialization vector and cipher key instead of setting these manually as you may inadvertently expose your encrypted data to vulnerabilities. If setting the IV, make sure it is at least 8 bytes, and that the cipher key is at least 24 bytes.</p>

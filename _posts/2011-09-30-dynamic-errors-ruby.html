@@ -1,0 +1,69 @@
+---
+layout: base
+title: Dynamic Error Creation with Ruby
+---
+<h2>{{ page.title }}</h2>
+
+<p>A useful pattern I've discovered when working on an api or gem for an external webservice is to be able to raise errors dynamically from an api call. Consider the following response to an HTTP request:</p>
+
+{% highlight js %}
+
+{
+  meta: {
+    code: 400,
+    errorType: 'SomeBogusError'
+    errorMessage: 'Your request failed because of some bogus error'
+  },
+  response: {}
+}
+
+{% endhighlight %}
+
+<p>Often with external apis, these error codes, types or messages can change rapidly, so you don't want to initialize a long list of these errors in your library. You'd rather create a new error class and let the end user of your library deal with the specific errors.</p>
+
+<p class='no-indent'>As a result, you might want to include the following code in your project:</p>
+
+{% highlight ruby %}
+
+module MyProject
+  module Errors
+    def self.new(type, message=nil)
+      unless self.const_defined?(type)
+        self.const_set type.intern, Class.new(StandardError) do
+          attr_reader :message
+
+          def initialize(message=nil)
+            @message = message
+          end
+        end
+      end
+
+      self.const_get(type).new(message)
+    end
+  end
+end
+
+{% endhighlight %}
+
+<p>Which has a really simple interface, and can be called within any project fairly easily.</p>
+
+{% highlight ruby %}
+
+MyProject::Errors.new('SomeBogusError', 'This is an error message')
+#=> #<MyProject::Errors::SomeBogusError: This is an error message>
+
+{% endhighlight %}
+
+<p>So in a gem that would wrap around this external webservice, you might have the following code:</p>
+
+{% highlight ruby %}
+
+# Get an http response from the webservice
+meta = JSON.parse(response.body)['meta']
+if meta['code'] != 200
+  raise MyProject::Errors.new(meta['errorType'], meta['errorMessage'])
+end
+
+{% endhighlight %}
+
+<p>This certainly makes dealing with the multitude of errors returned by some apis just that much easier.</p>

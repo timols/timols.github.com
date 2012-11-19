@@ -1,0 +1,179 @@
+---
+layout: base
+title: A simple way to track your macbook using the isight
+---
+<h2>{{ page.title }}</h2>
+
+<p class='no-indent'>
+  These instructions are for how to implement a simple laptop tracking script
+  on any Mac laptop. With OS X > 10.5.
+  All of the files for this can be found in the following <a
+  href="https://github.com/timols/laptoptracker">github repository</a>.
+  Download the following:
+</p>
+
+<ol class="digits">
+  <li>Get <a href="http://www.intergalactic.de/pages/iSight.html">isight capture</a></li>
+  <li class="last">Get <a href="http://www.bernhard-baehr.de/">sleepwatcher</a></li>
+</ol>
+
+<p class='no-indent'>
+  Download isightcapture and mount the image once the download is complete.
+  Copy the ‘isightcapture’ executable to either /usr/sbin or /bin/ (I placed
+  it into /bin). Download sleepwatcher to your Desktop and extract the archive.
+  After it’s extracted, fire up terminal.app and enter the following:
+</p>
+
+{% highlight bash %}
+
+  $ sudo mkdir -p /usr/local/sbin /usr/local/share/man/man8
+  $ sudo cp ~/Desktop/sleepwatcher_2.1.1/sleepwatcher /usr/local/sbin
+  $ sudo cp ~/Desktop/sleepwatcher_2.1.1/sleepwatcher.8 /usr/local/share/man/man8
+
+{% endhighlight %}
+
+<p class='no-indent'>
+  You'll then need to add a bash script to be executed when your laptop wakes.
+  You'll want to save this file as <code>/etc/rc.wakeup</code>. You can use
+  the following replacing the relevant parts:
+</p>
+
+{% highlight bash %}
+
+  #! /bin/sh
+
+  date=$(date +%d%m%y%H%M%S).jpg;
+
+  sleep 5;
+
+  /bin/isightcapture -w 640 -h 480 -t jpg /Users/USERNAME/Photos/$date;
+
+  sleep 60;
+
+  cur_status=`ifconfig en0 | grep -o '[a-z]*active'`;
+  cur_user=`id -un`;
+  cur_host=`scutil --get LocalHostName`;
+
+  if [ $cur_status == 'active' ]; then
+      ip_string=`python /Users/USERNAME/Documents/get_geoip_data.py`
+  else
+      ip_string="connection inactive";
+  fi
+
+  ip_log_string="$(date +%d/%m/%y' '%H:%M:%S), ${cur_host}, ${cur_user}, ${ip_string}";
+
+  echo $ip_log_string >> /Users/USERNAME/Photos/IPLog.txt;
+
+{% endhighlight %}
+
+<p class='no-indent'>
+  Don't forget to make sure that the rc.wakeup file has the appropriate read/write
+  attributes. Once you've saved it in the appropriate directory, enter terminal,
+  navigate to the directory the script is saved in and enter the following command:
+</p>
+
+{% highlight bash %}
+
+   $ sudo chmod 755 rc.wakeup
+
+{% endhighlight %}
+
+<p class='no-indent'>
+  You'll notice that the ip is obtained by the 'get_geoip_data' python script.
+  Create a file in the directory specified in the bash script, with the filename
+  get_geoip_data.py and fill it with:
+</p>
+
+{% highlight python %}
+
+  from BeautifulSoup import BeautifulSoup
+  from urllib2 import urlopen
+
+  def get_geoip_data():
+      result = {}
+      url_string = "http://www.maxmind.com/app/locate_my_ip"
+      res = urlopen(url_string)
+      html = res.read()
+      soup = BeautifulSoup(html)
+      keys = soup.findAll(attrs={'class' : 'tblProduct1'})
+      values = soup.findAll(attrs={'class' : 'output'})
+      for i in range(0, len(keys)):
+          result[keys[i].contents[0].strip()] = values[i].contents[0].strip()
+      return result
+
+  def format_result():
+      output = get_geoip_data()
+      lat_lon = output['Latitude/Longitude'].split('/')
+      ip = output['Your IP Address']
+      print "%s, %s, %s" % (ip, lat_lon[0], lat_lon[1])
+
+  format_result()
+
+{% endhighlight %}
+
+<p class='no-indent'>
+  In order to use this script, you'll need to have the Beautiful Soup python package
+  installed. If you have easy_install, you can install it with
+  <code>easy_install BeautifulSoup</code>, or you can install it from source
+  by going to the <a href="http://www.crummy.com/software/BeautifulSoup/">website</a>
+</p>
+
+<p class='no-indent'>
+  Finally, you need to set up the configuration file that is going to be handled
+  by the LaunchDaemon. Create a file called sleepwatcher.plist and fill it with
+  the following:
+</p>
+
+{% highlight xml %}
+
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
+                            "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+  <plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>capture_onstartup</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/local/sbin/sleepwatcher</string>
+      <string>-V</string>
+      <string>-w /etc/rc.wakeup</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+  </dict>
+  </plist>
+
+{% endhighlight %}
+
+<p class='no-indent'>
+  You'll then need to copy the configuration file to <code>/Library/LaunchDaemons/</code> and enable the LaunchDaemon
+  by entering the following command:
+</p>
+
+{% highlight bash %}
+
+   $ launchctl load /Library/LaunchDaemons/sleepwatcher.plist
+
+{% endhighlight %}
+
+<p class='no-indent'>
+  You should now be good to test that everything is working by closing the lid on
+  your laptop and then reopening it. You should find a photo of your face in your
+  photos directory. To make sure that you get the most value out of it make sure
+  to use it with Dropbox and ensure your photos directory is being synced or
+  alternatively, change the relevant directories in the bash script for the
+  appropriate directory in your Dropbox folder.
+</p>
+
+<p class='no-indent'>
+  For additional fun, you can sync these photos with your Facebook, Flickr or
+  Picassa albums through their REST APIs, or use a different cloud storage
+  solution so you can see who is using your device.
+</p>
+
+<p class='no-indent'>
+  If you get stuck, feel free to email me.
+</p>

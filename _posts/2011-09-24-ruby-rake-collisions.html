@@ -1,0 +1,55 @@
+---
+layout: base
+title: Ruby Rake Namespace Collisions
+---
+<h2>{{ page.title }}</h2>
+
+<p>I came across an interesting aspect of rake tasks recently that took a lot of head scratching to understand. Whenever you run a rake task, rake loads all of the files with .rake as their extension into memory to determine which task to run based on the command line parameters you used. I.e. when you type <code>rake some_task:make_it_happen --trace</code>, rake needs to parse all of the files to determine what to do for <code>some_task:make_it_happen</code>.</p>
+
+<p class="no-indent">This is fine, but where things can go a little funny is what you declare at the start of your rake files. Make sure you use namespaces! Something I found out the hard way was the following:</p>
+
+{% highlight ruby %}
+  # rake_task_1.rake
+  def test
+    puts 'a'
+  end
+
+  namespace :task_1 do
+    desc "Task 1"
+    task :do_it => :environment do
+      test
+    end
+  end
+
+  # rake_task_2.rake
+  def test
+    puts 'b'
+  end
+
+  namespace :task_2 do
+    desc "Task 2"
+    task :do_it => :environment do
+      test
+    end
+  end
+{% endhighlight %}
+
+<p>Now when you run <code>rake task_1:do_it</code> you'll see "b" printed to stdout (you may see it the other way round depending on which file is loaded into memory by rake first). This is very confusing if you've never seen it before, or you're not sure of how rake works!</p>
+
+<p class="no-indent">The solution is either to rename <code>test</code> to <code>task_1_test</code> or the following:</p>
+
+{% highlight ruby %}
+  # rake_task_1.rake
+  namespace :task_1 do
+    def test
+      puts 'a'
+    end
+
+    desc "Task 1"
+    task :do_it => :environment do
+      test
+    end
+  end
+{% endhighlight %}
+
+<p>Note that I was using Ruby 1.8.7 and Rake 0.8.7. Hope this helps!</p>
