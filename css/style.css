@@ -436,6 +436,20 @@ div.clear {
   text-align: center;
 }
 
+.posts {
+  list-style-type: none;
+  margin-left: 0;
+}
+
+.posts li {
+  margin-bottom: 5px;
+}
+
+.post-date {
+  width: 120px;
+  display: inline-block;
+}
+
 /**
  * Non-semantic helper classes: please define your styles before this section.
  */
