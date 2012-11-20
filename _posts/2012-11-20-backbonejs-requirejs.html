@@ -1,0 +1,248 @@
+---
+layout: base
+title: Setting up a BackboneJS application with RequireJS
+---
+<h2>{{ page.title }}</h2>
+
+<p class="no-indent">
+  Scouring the internet I was unable to find particularly good instructions on how to structure a backbone js application for use with requirejs. A lot of tutorials one might find on the internet often teach new comers to put everything into one large <code>app.js</code> javascript file.
+</p>
+
+{% highlight js %}
+// app.js
+var AppModel = Backbone.Model.extend({
+ // ...
+})
+
+var AppCollection = Backbone.Collection.extend({
+  model: AppModel,
+
+  // ...
+})
+
+var AppView = BackBone.View.extend({
+  // ...
+})
+
+var App = Backbone.Router.extend({
+  routes: {
+    '/': 'index'
+  },
+
+  index: function() {
+    new AppView();
+  }
+})
+
+new App();
+Backbone.history.start();
+
+{% endhighlight %}
+
+<p class="no-indent">
+  Then inject that into the header of the html page.
+</p>
+
+{% highlight html %}
+<html>
+  <head>
+    <title>My App</title>
+    <!-- various app dependencies like jquery, backbone, underscore etc -->
+    <script type="text/javascript" src='app.js'></script>
+  </head>
+  <body>
+    <div id="content">
+      <!-- all your wonderful html in here -->
+    </div>
+  </body>
+</html>
+
+{% endhighlight %}
+
+<p class="no-indent">
+  Then, once the application starts to grow, the next strategy is to use multiple <code>&lt;script&gt;</code> tags to include each of the relevant application dependencies. I have seen far too many instances where the content of the <code>&lt;head&gt;</code> tag grows out of control and is an absolute mess.
+</p>
+
+<p class="no-indent">
+  The use of <a href="https://github.com/amdjs/amdjs-api/wiki/AMD">AMD</a> is a very effective pattern for overcoming the issues associated with multiple package dependencies, asynchronous loading, as well as effective application structure. <a href="http://requirejs.org/docs/whyamd.html">RequireJS</a> does a much better job of explaining why this is such a desirable pattern.
+</p>
+
+<p class="no-indent">
+  Since Backbone is such a relatively light framework, it is a reasonable candidate for an explanation of application structure and usage of requirejs.
+</p>
+
+<p class="no-indent">
+  Consider the following basic application structure:
+</p>
+
+<pre><code>base_project_dir/js/
++- app
+   +- collections
+      -- model_collection.js
+   +- models
+      -- model.js
+   +- templates
+      -- main_view.tmpl
+   +- views
+      -- main_view.js
+   -- app.js
+   -- config.js
+   -- router.js
++- lib
+   +- backbone
+      -- backbone.js
+   +- jquery
+      -- jquery.js
+   +- underscore
+      -- underscore.js
+-- require.js
+-- text.js
+-- main.js
+</code></pre>
+
+<p class="no-indent">Implementing this structure is relatively straightforward. The main application models, views, collections and router contain the following structure:</p>
+
+{% highlight js %}
+// /js/app/collections/model_collection.js
+define(['app/config', 'app/models/model'], function (config, AppModel) {
+  return Backbone.Collection.extend({
+    model: AppModel,
+    url:   config.baseName + '/models',
+
+    // ...
+  });
+});
+
+// /js/app/models/model.js
+define(['app/config'], function (config) {
+  return Backbone.Model.extend({
+    // ...
+  });
+});
+
+// /js/app/views/main_view.js
+define(['app/models/config', 'text!app/templates/main_view.tmpl'], function (config, tmpl) {
+  return Backbone.View.extend({
+    template: _.template(tmpl),
+
+    // ...
+  });
+});
+
+// /js/app/router.js
+define(['app/views/app_view'], function (AppView) {
+  var AppRouter = Backbone.Router.extend({
+    routes: {
+      '/': 'index'
+    },
+
+    index: function () {
+      var view = new AppView();
+      view.render();
+    }
+  });
+
+  return {
+    initialize: function () {
+      new AppRouter();
+      Backbone.history.start();
+    }
+  };
+});
+
+{% endhighlight %}
+
+<p class="no-indent">We can't forget the application view template:</p>
+
+{% highlight html %}
+<!-- /js/app/templates/main_view.tmpl -->
+<div class='template-class'>
+  <!-- other markup... -->
+</div>
+
+{% endhighlight %}
+
+
+<p class="no-indent">
+  We keep a config module to store any relevant configuration required at runtime. It might also make sense to define a utilities module, but its not essential for an application of this size. If it were, it could easily be added inside the existing application structure.
+</p>
+
+{% highlight js %}
+// /js/app/config.js
+define(function () {
+  return {
+    key1: 'value1',
+    key2: 'value2',
+    key3: function () {};
+
+    // ...
+  };
+});
+
+{% endhighlight %}
+
+<p class="no-indent">
+  With the main application files defined, we can then go about starting our application using requirejs:
+</p>
+
+{% highlight js %}
+// /js/app/app.js
+define(['app/router'], function (AppRouter) {
+  return {
+    initialize: AppRouter.initialize
+  };
+});
+
+// /js/main.js
+requirejs.config({
+  paths: {
+    // Libraries
+    jquery: './lib/jquery/jquery',
+    underscore: './lib/underscore/underscore',
+    backbone: './lib/backbone/backbone'
+  },
+
+  shim: {
+    // Define any vendor packages that require dependencies to be loaded
+    'backbone': {
+      deps: ['underscore', 'jquery'],
+      exports: 'Backbone'
+    }
+  }
+});
+
+define(['jquery', 'underscore', 'backbone'], function ($, _, Backbone) {
+  require(['app/app'], function (App) {
+    // Lets get this party started!
+    window.App = App.initialize();
+  });
+});
+
+{% endhighlight %}
+
+<p class="no-indent">This now means our initial markup is a lot cleaner:</p>
+
+{% highlight html %}
+
+<html>
+  <head>
+    <title>My App</title>
+    <!-- No more dependencies -->
+    <script type="text/javascript" src='require.js' data-main='js/main'></script>
+  </head>
+  <body>
+    <div id="content">
+      <!-- all your wonderful html in here -->
+    </div>
+  </body>
+</html>
+
+{% endhighlight %}
+
+<p class="no-indent">
+  The <code>data-main</code> attribute in the <code>&lt;script&gt;</code> tag is part of the requirejs api and points to the entry point of our application. The requirejs configuration allows us to define our 'global' dependencies once within the application, and have it available within the namespace from that point on.
+</p>
+
+<p class='no-indent'>
+  RequireJS also comes with a packager, which allows you to package all of your application js and dependencies into one file that gets parsed by the browser. All that needs to change is that the <code>data-main</code> attribute should point to the location of the built application file.
+</p>
