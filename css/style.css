@@ -188,10 +188,22 @@ body {
   width: 700px;
   margin: 0 auto;
 }
+a {
+  text-decoration: none;
+}
+#splash a {
+  text-decoration: underline;
+  color: #6f6f6f;
+}
+
+#splash a:hover {
+  text-decoration: underline;
+  color: #6f6f6f;
+}
 
 #logo {
   float: left;
-  margin: 0 245px 0 0;
+  margin: 0 410px 0 0;
 }
 
 #nav {
@@ -225,7 +237,6 @@ body {
 
 #nav li {
   font-family: mammagamma;
-/*  border-left: 1px solid #000;*/
   display: inline;
   font-size: 18pt;
   margin: 0;
@@ -269,7 +280,6 @@ body {
 
 #main a {
   color: #6f6f6f;
-  text-decoration: none;
 }
 
 #main a:hover {
@@ -303,8 +313,8 @@ body {
 #container { width: 700px; margin: 0 auto; padding: 0; }
 
 #contact {
-  float: right;
-  margin: 30px 30px 0 0;
+  margin: 30px auto 0 auto;
+  display: block;
   background-image: url('/images/contact.jpg');
   width: 142px;
   height: 138px;
@@ -318,15 +328,19 @@ body {
 #splash { width: 700px; float: left; text-align: center; display: block; margin: 40px 0; }
 #splash h1 { font-size: 66pt; font-weight: normal; margin: 30px 0 50px 0; text-align: center; }
 #splash h2 { font-size: 20pt; font-weight: normal; margin: 40px 0; color: #6f6f6f; text-align: center; }
+#splash p {
+  width: 420px;
+  margin: 0 auto 15px auto;
+  font-family: "Helvetica Neue";
+}
 
 .box {
-  background-color: black;
-  color: white;
+  background-color: white;
+  color: #6f6f6f;
   width: 190px;
   height: 34px;
-  margin: 0 0 0 60px;
+  margin: 0 0 0 36px;
   padding: 0;
-  border: 1px solid #393939;
   float: left;
   text-align: center;
   text-decoration: none;
@@ -338,11 +352,17 @@ body {
   text-align: center;
 }
 .box.first { margin-left: 0px; }
-.box:hover { color: black; background-color: white; border: 1px solid white; }
+.box:hover { color: black; }
 
 .box_div {
   float: left;
   text-align: center;
+  border-radius: 4px;
+}
+
+.boxes {
+  width: 420px;
+  margin: 0 auto;
 }
 
 .box_div h4 {

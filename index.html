@@ -9,67 +9,26 @@ title: Welcome
   <div id='splash'>
     <h1>tim olshansky</h1>
     <h2>gets stuff done.</h2>
+    <p>Hi! I'm currently using technology to solve business problems for companies in the San Francisco Bay Area.</p>
+    <p class='no-indent'>I build products with software using the latest in web technologies and development methodologies.</p>
+    <p class='no-indent'>I like to make stuff. If you think I can help, please <a href='/contact.html'>get in touch</a>.</p>
   </div><!-- splash -->
 
-  <div id='about' class='box_div'>
-    <a href='/about.html' class='box first'>
-      <h3>about</h3>
-    </a>
-    <h4>who i am</h4>
-  </div><!-- about -->
+  <div class='boxes'>
 
-  <div id='blog' class='box_div'>
-    <a href='/blog.html' class='box'>
-      <h3>blog</h3>
-    </a>
-    <h4>what i think</h4>
-  </div><!-- blog -->
+    <div id='blog' class='box_div'>
+      <a href='/blog.html' class='box first'>
+        <h3>blog</h3>
+      </a>
+    </div><!-- blog -->
 
-  <div id='projects' class='box_div'>
-    <a href='/projects.html' class='box'>
-      <h3>projects</h3>
-    </a>
-    <h4>what i've done</h4>
-  </div><!-- projects -->
+    <!-- If you're reading this and wondering what the hell is going on, take it easy. The styling and markup needs work. A job for a later date. -->
+    <div id='projects' class='box_div'>
+      <a href='/contact.html' class='box'>
+        <h3>contact</h3>
+      </a>
+    </div><!-- contact -->
+
+  </div>
 
 </div><!-- container -->
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.js"></script>
-<script>!window.jQuery && document.write(unescape('%3Cscript src="js/libs/jquery-1.5.1.min.js"%3E%3C/script%3E'))</script>
-<script type='text/javascript'>
-  $(document).ready(function () {
-
-    var boxes = [
-      {
-        box:   $('#about'),
-        enter: 'who i want to be',
-        leave: 'who i am'
-      },
-      {
-        box:   $('#blog'),
-        enter: 'what inspires me',
-        leave: 'what i think'
-      },
-      {
-        box:   $('#projects'),
-        enter: "what i've learned",
-        leave: "what i've done"
-      }
-    ]
-
-    $.each(boxes, function () {
-      var object = this
-        , box = object.box;
-
-      box.find('a').bind('mouseenter', function () {
-        var elem = $(this).parent('div').find('h4');
-        elem.attr('innerHTML', object.enter);
-      });
-
-      box.find('a').bind('mouseleave', function () {
-        var elem = $(this).parent('div').find('h4');
-        elem.attr('innerHTML', object.leave);
-      });
-    });
-
-  });
-</script>
