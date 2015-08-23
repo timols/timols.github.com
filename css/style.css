@@ -203,7 +203,7 @@ a {
 
 #logo {
   float: left;
-  margin: 0 410px 0 0;
+  margin: 0 388px 0 0;
 }
 
 #nav {
@@ -218,6 +218,15 @@ a {
   font-size: 32px;
   font-weight: bold;
   float: left;
+}
+
+#nav h1 img {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  box-sizing: border-box;
 }
 
 #nav a {
@@ -337,6 +346,14 @@ a {
   width: 420px;
   margin: 0 auto 15px auto;
   font-family: "Helvetica Neue";
+}
+
+#splash h1 img {
+  border-radius: 50%;
+  border: 1px solid #cccfd0;
+  box-sizing: border-box;
+  display: block;
+  margin: 0 auto 40px auto;
 }
 
 .box {
@@ -550,4 +567,3 @@ div.clear {
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3{ page-break-after: avoid; }
 }
-
